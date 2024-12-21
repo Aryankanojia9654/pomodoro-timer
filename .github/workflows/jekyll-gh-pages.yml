@@ -1,9 +1,8 @@
-name: Deploy Tailwind CSS to GitHub Pages
+name: Deploy Tailwind Project to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # Runs on pushes to the main branch
-  workflow_dispatch: # Allows manual trigger from the Actions tab
+    branches: [main]
 
 permissions:
   contents: read
@@ -11,35 +10,19 @@ permissions:
   id-token: write
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16 # Ensure the Node.js version matches your project requirements
-
-      - name: Install Dependencies
-        run: npm install
-
       - name: Build Tailwind CSS
-        run: npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify
+        run: |
+          npm install
+          npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify
 
-      - name: Upload to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist # Specify the folder to deploy
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
